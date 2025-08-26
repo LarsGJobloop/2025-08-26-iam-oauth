@@ -1,4 +1,7 @@
 
+using System.Net;
+using System.Text.Json;
+
 class GitHubOAuthClient : IOAuthClient
 {
   // These are gotten from the IdP (GitHub)
@@ -11,13 +14,61 @@ class GitHubOAuthClient : IOAuthClient
   private static readonly string authorizeUrl = "https://github.com/login/oauth/authorize";
   private static readonly string tokenUrl = "https://github.com/login/oauth/access_token";
 
+  private string? userToken = null;
+
   public Task<string> GetProfileInfo()
   {
     throw new NotImplementedException();
   }
 
-  public Task Login()
+  public async Task Login()
   {
-    throw new NotImplementedException();
+    // Construct URL
+    string state = Guid.NewGuid().ToString("N");
+    string scopes = "read:user";
+    string url = $"{authorizeUrl}?client_id={clientId}&redirect_uri={redirectUri}&scope={scopes}&state={state}";
+    // Have user navigate to URL
+    Console.WriteLine($"Navigate to: {url}");
+
+    // Setup callback listner
+    using var listener = new HttpListener();
+    listener.Prefixes.Add(redirectUri);
+    listener.Start();
+    // Await callback from browser
+    var context = await listener.GetContextAsync();
+    var request = context.Request;
+    // If these are wrong, GitHub is at fault. We can do nothing, but crash
+    string code = request.QueryString["code"]!;
+    string gotState = request.QueryString["state"]!;
+
+    // Inform the user that they can close the browser
+    var response = context.Response;
+    string body = "You may now close this window.";
+    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(body);
+    response.OutputStream.Write(buffer, 0, buffer.Length);
+    response.Close();
+    listener.Stop();
+
+    // Verify that the state is correct.
+    if (gotState != state) throw new Exception("State mismatch!");
+
+    // Exchange code for an actual API token
+    using var http = new HttpClient();
+    var tokenRequest = new HttpRequestMessage(HttpMethod.Post, tokenUrl);
+    tokenRequest.Headers.Add("Accept", "application/json");
+    tokenRequest.Content = new FormUrlEncodedContent(
+    [
+      new KeyValuePair<string,string>("client_id", clientId),
+      new KeyValuePair<string,string>("client_secret", clientSecret),
+      new KeyValuePair<string,string>("code", code),
+      new KeyValuePair<string,string>("redirect_uri", redirectUri)
+    ]);
+    var tokenResponse = await http.SendAsync(tokenRequest);
+    string tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+    Console.WriteLine($"Returned token: {tokenJson}");
+    string accessToken = JsonDocument.Parse(tokenJson).RootElement.GetProperty("access_token").GetString();
+
+    // Store token for later use
+    userToken = accessToken;
   }
 }
