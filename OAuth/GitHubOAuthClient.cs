@@ -65,6 +65,7 @@ class GitHubOAuthClient : IOAuthClient
     ]);
     var tokenResponse = await http.SendAsync(tokenRequest);
     string tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+    // WARNING! Never expose the token it's a password!
     Console.WriteLine($"Returned token: {tokenJson}");
     string accessToken = JsonDocument.Parse(tokenJson).RootElement.GetProperty("access_token").GetString();
 
