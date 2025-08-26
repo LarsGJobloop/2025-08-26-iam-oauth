@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿// Login use via GitHub
+Console.WriteLine("Loging in via GitHub OAuth")
+
+// Console log User Info
+Console.WriteLine("Printing GitHub profile info")
