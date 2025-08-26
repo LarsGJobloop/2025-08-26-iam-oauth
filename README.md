@@ -14,3 +14,4 @@
 ## References
 
 - [GitHub REST API Docs](https://docs.github.com/en/rest)
+- [Official OAuth Page](https://oauth.net/2/)
