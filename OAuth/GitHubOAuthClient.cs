@@ -16,9 +16,21 @@ class GitHubOAuthClient : IOAuthClient
 
   private string? userToken = null;
 
-  public Task<string> GetProfileInfo()
+  public async Task<string> GetProfileInfo()
   {
-    throw new NotImplementedException();
+    // Setup HTTP request
+    string userApiUrl = "https://api.github.com/user";
+    var request = new HttpRequestMessage(HttpMethod.Get, userApiUrl);
+    request.Headers.Add("Authorization", "Bearer " + userToken);
+    request.Headers.Add("User-Agent", "OAuthDemoApp");
+
+    // Make request
+    var http = new HttpClient();
+    var response = await http.SendAsync(request);
+
+    // Parse and return info
+    string userJson = await response.Content.ReadAsStringAsync();
+    return userJson;
   }
 
   public async Task Login()
