@@ -8,3 +8,4 @@
 ## References
 
 - [GitHub Developer Settings](https://github.com/settings/developers)
+- [GitHub REST API Docs](https://docs.github.com/en/rest)
