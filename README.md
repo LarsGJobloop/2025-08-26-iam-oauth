@@ -1,3 +1,7 @@
+## Sketches
+
+![Lecture sketch](/docs/oauth-flow.excalidraw.png)
+
 ## Notes
 
 - For callback URL use localhost (or the actual IP, 127.0.0.1)
