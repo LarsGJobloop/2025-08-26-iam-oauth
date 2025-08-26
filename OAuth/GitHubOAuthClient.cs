@@ -49,7 +49,7 @@ class GitHubOAuthClient : IOAuthClient
     // Await callback from browser
     var context = await listener.GetContextAsync();
     var request = context.Request;
-    // If these are wrong, GitHub is at fault. We can do nothing, but crash
+    // If these are missing, it means the OAuth flow was not completed, usually a misconfiguration.
     string code = request.QueryString["code"]!;
     string gotState = request.QueryString["state"]!;
 
